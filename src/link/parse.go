@@ -22,7 +22,7 @@ func Parse(r io.Reader) ([]Link, error) {
 	if err != nil {
 		return nil, err
 	}
-	//we are passing the html nodes as a pointer here because 
+	//we are passing the html nodes as a pointer here because
 	//efficiently modify and traverse
 	// the tree-like structure representing the HTML document.
 	nodes := linkNodes(doc)
@@ -39,11 +39,11 @@ func Parse(r io.Reader) ([]Link, error) {
 	return links, nil
 }
 
-//for extracting the href in the link and text for a node link
+// for extracting the href in the link and text for a node link
 func buildLink(n *html.Node) Link {
 	var ret Link
 	//n.Attr, = Attr is  an array of struct field in the Node struct, attr represents the attr
-	//a node has e.g href for <a> tag and class names and so on, so we are 
+	//a node has e.g href for <a> tag and class names and so on, so we are
 	//extracting it
 	for _, attr := range n.Attr {
 		if attr.Key == "href" {
@@ -55,11 +55,12 @@ func buildLink(n *html.Node) Link {
 	return ret
 }
 
+/*
 //this is the function to extract the texts from the node
 func text(n *html.Node) string {
 	//Node type is an indicator used to identify the type of node its not part
 	//of the node struct
-	/*
+
 	const (
     ErrorNode NodeType = iota // Node is an error node
     TextNode                  // Node is a text node
@@ -68,9 +69,9 @@ func text(n *html.Node) string {
     CommentNode               // Node is a comment
     DoctypeNode               // Node is a DOCTYPE declaration
 )
-	*/
+
 	if n.Type == html.TextNode {
-		//type and data is a part of the node struct, 
+		//type and data is a part of the node struct,
 		//we are checking here if the type of the node is a text,
 		//then returning the data =<a>
 		return n.Data
@@ -84,15 +85,15 @@ func text(n *html.Node) string {
 	//which is a text and while c is not empty we are increasing it to the next sibling
 	//which is another link tag<a>
 	//first child of the link is a text
-	//then we are storing the text in ret 
+	//then we are storing the text in ret
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
 		ret += text(c)
 	}
 	return strings.Join(strings.Fields(ret), " ")
 }
-
-
-//here we are collecting each node which has a <a> tag 
+*/
+/*
+//here we are collecting each node which has a <a> tag
 func linkNodes(n *html.Node) []*html.Node {
 	//checming if the type of the node is an element
 	// and the data of the node is <a>
@@ -106,5 +107,50 @@ func linkNodes(n *html.Node) []*html.Node {
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
 		ret = append(ret, linkNodes(c)...)
 	}
+	return ret
+}
+
+*/
+func text(n *html.Node) string {
+	var ret strings.Builder
+	stack := []*html.Node{n}
+
+	for len(stack) > 0 {
+		node := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+
+		if node.Type == html.TextNode {
+			ret.WriteString(node.Data)
+		}
+
+		for c := node.FirstChild; c != nil; c = c.NextSibling {
+			stack = append(stack, c)
+		}
+	}
+
+	return strings.Join(strings.Fields(ret.String()), " ")
+}
+
+
+
+
+
+func linkNodes(n *html.Node) []*html.Node {
+	var ret []*html.Node
+	stack := []*html.Node{n}
+
+	for len(stack) > 0 {
+		node := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+
+		if node.Type == html.ElementNode && node.Data == "a" {
+			ret = append(ret, node)
+		}
+
+		for c := node.FirstChild; c != nil; c = c.NextSibling {
+			stack = append(stack, c)
+		}
+	}
+
 	return ret
 }
