@@ -111,46 +111,45 @@ func linkNodes(n *html.Node) []*html.Node {
 }
 
 */
+
 func text(n *html.Node) string {
-	var ret strings.Builder
-	stack := []*html.Node{n}
+	var ret strings.Builder  // Initialize a strings.Builder to concatenate text content
+	stack := []*html.Node{n} // Initialize a stack with the root node n
 
-	for len(stack) > 0 {
-		node := stack[len(stack)-1]
-		stack = stack[:len(stack)-1]
+	for len(stack) > 0 { // While the stack is not empty
+		node := stack[len(stack)-1]  // Get the last node from the stack (top of the stack)
+		stack = stack[:len(stack)-1] // Remove the last node from the stack (pop operation)
 
-		if node.Type == html.TextNode {
-			ret.WriteString(node.Data)
+		if node.Type == html.TextNode { // If the node is a text node
+			ret.WriteString(node.Data) // Append its data (text content) to the strings.Builder
 		}
 
+		// Loop through the child nodes of the current node and push them onto the stack
 		for c := node.FirstChild; c != nil; c = c.NextSibling {
-			stack = append(stack, c)
+			stack = append(stack, c) // Push the child node onto the stack
 		}
 	}
 
-	return strings.Join(strings.Fields(ret.String()), " ")
+	return strings.Join(strings.Fields(ret.String()), " ") // Return the concatenated text content
 }
 
-
-
-
-
 func linkNodes(n *html.Node) []*html.Node {
-	var ret []*html.Node
-	stack := []*html.Node{n}
+	var ret []*html.Node     // Initialize an empty slice to hold the anchor nodes
+	stack := []*html.Node{n} // Initialize a stack with the root node n
 
-	for len(stack) > 0 {
-		node := stack[len(stack)-1]
-		stack = stack[:len(stack)-1]
+	for len(stack) > 0 { // While the stack is not empty
+		node := stack[len(stack)-1]  // Get the last node from the stack (top of the stack)
+		stack = stack[:len(stack)-1] // Remove the last node from the stack (pop operation)
 
-		if node.Type == html.ElementNode && node.Data == "a" {
-			ret = append(ret, node)
+		if node.Type == html.ElementNode && node.Data == "a" { // If the node is an anchor element
+			ret = append(ret, node) // Add it to the slice of anchor nodes
 		}
 
+		// Loop through the child nodes of the current node and push them onto the stack
 		for c := node.FirstChild; c != nil; c = c.NextSibling {
-			stack = append(stack, c)
+			stack = append(stack, c) // Push the child node onto the stack
 		}
 	}
 
-	return ret
+	return ret // Return the slice of anchor nodes
 }
